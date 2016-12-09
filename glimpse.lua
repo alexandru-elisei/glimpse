@@ -53,9 +53,8 @@ function glimpse:start()
 
     self:fetch_mail()
     self.widget:set_text(self:get_widget_text())
-    self.fetch_all = true
 
-    self.timer = timer({timeout = retry_timemout})
+    self.timer = timer({timeout = self.retry_interval})
     -- Using closures to preserve the object.
     self.timer:connect_signal('timeout', function() glimpse.check_mail(self) end)
     self.timer:start()
