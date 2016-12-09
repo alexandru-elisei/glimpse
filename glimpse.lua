@@ -13,7 +13,7 @@ local homedir = os.getenv("HOME")
 
 local defaults = {
     poll_interval = 300,
-    retry_interval = 10,
+    fetch_interval = 10,
     tmpdir = homedir,
     pydir = '/usr/share/awesome/lib/glimpse/'
 }
@@ -54,7 +54,7 @@ function glimpse:start()
     self:fetch_mail()
     self.widget:set_text(self:get_widget_text())
 
-    self.timer = timer({timeout = self.retry_interval})
+    self.timer = timer({timeout = self.fetch_interval})
     -- Using closures to preserve the object.
     self.timer:connect_signal('timeout', function() glimpse.check_mail(self) end)
     self.timer:start()
@@ -70,6 +70,14 @@ function glimpse:reset_timer(timeout)
     self.timer:stop()
     self.timer.timeout = timeout
     self.timer:start()
+end
+
+function glimpse:toggle_notification()
+    if self.notification and self.notification.box.visible then
+        self.notification:die()
+    else
+        self:notify(true)
+    end
 end
 
 function glimpse:notify(all)
@@ -88,7 +96,7 @@ function glimpse:notify(all)
     end
 
     if notification_text:len() > 0 then
-        naughty.notify({title = 'Glimpse', text = notification_text, timeout = 10})
+        self.notification = naughty.notify({title = 'Glimpse', text = notification_text, timeout = 10})
     end
 end
 
@@ -97,35 +105,35 @@ function glimpse:check_mail()
     if self.fetch_all then
         self.fetch_all = false
         self:fetch_mail()
-        self:reset_timer(self.retry_interval)
+        self:reset_timer(self.fetch_interval)
         return
     end
 
-    local fetch_timeout = false
+    local fetch_timed_out = false
 
     for key, account in pairs(self.accounts) do
         -- Only check accounts who are fetching the emails.
         if account.state == 'fetching' then
-            local account_timeout = false
+            local account_timed_out = false
             local f = io.open(account.tmpfile)
 
             if f == nil then
-                account_timeout = true
-                fetch_timeout = true
+                account_timed_out = true
+                fetch_timed_out = true
             end
 
             local count
 
-            if not account_timeout then
+            if not account_timed_out then
                 count = f:read('*line')
                 if count == nil then
                     f:close()
-                    account_timeout = true
-                    fetch_timeout = true
+                    account_timed_out = true
+                    fetch_timed_out = true
                 end
             end
 
-            if not account_timeout then
+            if not account_timed_out then
                 if string.match(count, '^[0-9]+$') then
                     count = tonumber(count)
                     self.accounts[key].count = count
@@ -154,9 +162,9 @@ function glimpse:check_mail()
     self:notify()
     self.widget:set_text(self:get_widget_text())
 
-    if fetch_timeout then
+    if fetch_timed_out then
         -- Retry reading the account temporary files.
-        self:reset_timer(self.retry_interval)
+        self:reset_timer(self.fetch_interval)
     else
         -- Queue polling all accounts.
         self.fetch_all = true
@@ -168,7 +176,7 @@ local function new(args)
     local self = setmetatable({}, {__index = glimpse})
 
     self.poll_interval = args.poll_interval or defaults.poll_interval
-    self.retry_interval = args.retry_interval or defaults.retry_interval
+    self.fetch_interval = args.fetch_interval or defaults.fetch_interval
 
     local pydir = args.pydir or defaults.pydir
     pydir = pydir:gsub("^~", homedir)
