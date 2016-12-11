@@ -112,8 +112,9 @@ function glimpse:check_mail()
     local fetch_timed_out = false
 
     for key, account in pairs(self.accounts) do
-        -- Only check accounts who are fetching the emails.
-        if account.state == 'fetching' then
+        -- Only check accounts who are fetching the emails or had an error
+        -- during a previous attempt.
+        if account.state == 'fetching' or account.state == 'error' then
             local account_timed_out = false
             local f = io.open(account.tmpfile)
 
@@ -138,12 +139,11 @@ function glimpse:check_mail()
                     count = tonumber(count)
                     self.accounts[key].count = count
 
-                    -- Only preview new emails.
-                    if count > account.prev_count then
+                    if count > account.prev_count or account.state == 'error' then
                         self.accounts[key].content = '\n['..account.account..']\n'..f:read('*all')
                     end
 
-                    if account.prev_count ~= count then
+                    if account.prev_count ~= count or account.state == 'error' then
                         self.accounts[key].prev_count = count
                         self.accounts[key].state = 'new'
                     else

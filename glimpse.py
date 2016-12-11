@@ -92,6 +92,9 @@ def main(config_file):
             print(ERR + 'Cannot fetch email: ' + msg + '.')
             return
 
+        # Removing the 'Seen' flag, we have only previewed the headers.
+        M.store(last_email_id, '-FLAGS', '\\Seen')
+
         raw_email = data[0][1]
         email_msg = email.message_from_bytes(raw_email)
 
@@ -101,9 +104,6 @@ def main(config_file):
 
         return_string += 'Subject: ' + str(make_header(decode_header(subject_header))) + '\n'
         return_string += '\n'
-
-        # Removing the 'Seen' flag, we have only previewed the headers.
-        M.store(last_email_id, '-FLAGS', '\\Seen')
 
     M.close()
     M.logout()
