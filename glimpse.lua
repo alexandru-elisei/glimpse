@@ -9,12 +9,11 @@ local timer = timer
 local table = table
 
 local glimpse = {mt = {}}
-local homedir = os.getenv("HOME")
 
 local defaults = {
     poll_interval = 300,
     fetch_interval = 10,
-    tmpdir = homedir,
+    tmpdir = '/tmp',
     pydir = '/usr/share/awesome/lib/glimpse/'
 }
 
@@ -175,6 +174,7 @@ local function new(args)
     self.poll_interval = args.poll_interval or defaults.poll_interval
     self.fetch_interval = args.fetch_interval or defaults.fetch_interval
 
+    local homedir = os.getenv("HOME")
     local pydir = args.pydir or defaults.pydir
     pydir = pydir:gsub("^~", homedir)
     self.pydir = pydir
