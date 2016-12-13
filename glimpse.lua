@@ -14,14 +14,14 @@ local defaults = {
     poll_interval = 300,
     fetch_interval = 10,
     tmpdir = '/tmp',
-    pydir = '/usr/share/awesome/lib/glimpse/'
+    pydir = '/usr/share/awesome/lib/glimpse'
 }
 
 function glimpse:fetch_mail()
     -- Setting all acounts' state to fetching mail.
     for key, account in pairs(self.accounts) do
         self.accounts[key].state = 'fetching'
-        os.execute('touch '..account.tmpfile..' && chmod 0600 '..account.tmpfile..' && PYTHONIOENCODING=utf8 '..self.pydir..'/glimpse.py '..account.conf..' > '..account.tmpfile..' &')
+        os.execute('touch '..account.tmpfile..' && chmod 0600 '..account.tmpfile..' && PYTHONIOENCODING=utf8 '..self.pyfile..' '..account.conf..' > '..account.tmpfile..' &')
     end
 end
 
@@ -177,7 +177,7 @@ local function new(args)
     local homedir = os.getenv("HOME")
     local pydir = args.pydir or defaults.pydir
     pydir = pydir:gsub("^~", homedir)
-    self.pydir = pydir
+    self.pyfile = pydir..'/glimpse.py'
 
     local tmpdir = args.tmpdir or defaults.tmpdir
     tmpdir = tmpdir:gsub("^~", homedir)
