@@ -79,7 +79,7 @@ def main(config_file):
 
     preview_count = unseen
     preview = int(conf.get('preview', 0))
-    if preview != -1 and preview_count > preview:
+    if preview != 0 and preview < preview_count:
         preview_count = preview
 
     return_string = str(unseen) + '\n'
