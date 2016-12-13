@@ -139,11 +139,8 @@ function glimpse:check_mail()
                     count = tonumber(count)
                     self.accounts[key].count = count
 
-                    if count > account.prev_count or account.state == 'error' then
-                        self.accounts[key].content = '\n['..account.account..']\n'..f:read('*all')
-                    end
-
                     if account.prev_count ~= count or account.state == 'error' then
+                        self.accounts[key].content = '\n['..account.account..']\n'..f:read('*all')
                         self.accounts[key].prev_count = count
                         self.accounts[key].state = 'new'
                     else
