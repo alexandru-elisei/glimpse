@@ -79,6 +79,9 @@ function glimpse:toggle_notification()
     end
 end
 
+--- Create the notification with the fetched emails from the temporary files.
+-- @param all If all fetched emails should be previewed or only those from the
+--   accounts with new emails or with an error.
 function glimpse:notify(all)
     local notification_text = ''
 
@@ -168,6 +171,21 @@ function glimpse:check_mail()
     end
 end
 
+--- Constructor for the glimpse module.
+-- @param pydir The directory where the script glimpse.py is located.
+--   Default: /usr/lib/awesome/lib/glimpse
+-- @param tmpdir The directory where the fetched emails will be located.
+--   Default: /tmp
+-- @param poll_interval The interval between fetching emails, in seconds.
+--   Default: 300
+-- @param retry_interval The interval between checking the temporary files
+--   after the command to fetch the mails has been issued, in seconds.
+--   Default: 10
+-- @param accounts Numerically indexed table with account information.
+-- @param accounts.account Account name. Will be displayed in the notifications.
+-- @param accounts.shortname Account shortname. Will be displayed in the
+--   wibox.
+-- @param accounts.conf Path to configuration file for the account.
 local function new(args)
     local self = setmetatable({}, {__index = glimpse})
 
