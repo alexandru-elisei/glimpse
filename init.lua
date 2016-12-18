@@ -1,6 +1,6 @@
 -- @author Alexandru Elisei &lt;alexandru.elisei@gmail.com&gt;
 -- @copyright 2016 Alexandru Elisei
--- @release 0.3.0
+-- @release 0.4.0
 
 -- Module environment
 local wibox = require("wibox")
