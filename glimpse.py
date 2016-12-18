@@ -57,7 +57,7 @@ def main(config_file):
         return
 
     mailbox = conf.get('mailbox', 'INBOX')
-    status, msg = M.select(mailbox)
+    status, msg = M.select(mailbox, True)
     if status != 'OK':
         msg = msg[0].decode()
         print(ERR + 'Cannot select mailbox: ' + msg + '.')
@@ -91,9 +91,6 @@ def main(config_file):
             msg = msg[0].decode()
             print(ERR + 'Cannot fetch email: ' + msg + '.')
             return
-
-        # Removing the 'Seen' flag, we have only previewed the headers.
-        M.store(last_email_id, '-FLAGS', '\\Seen')
 
         raw_email = data[0][1]
         email_msg = email.message_from_bytes(raw_email)
