@@ -88,7 +88,9 @@ function glimpse:notify(all)
     for _, account in pairs(self.accounts) do
         if all then
             notification_text = notification_text..account.content
-            account.state = 'seen'
+            if account.state == 'new' then
+                account.state = 'seen'
+            end
         elseif account.state == 'new' then
             notification_text = notification_text..account.content
             account.state = 'seen'
