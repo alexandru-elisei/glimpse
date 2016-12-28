@@ -3,19 +3,19 @@
 import imaplib
 import email
 from email.header import decode_header, make_header
-import sys
 import configparser
+import argparse
 import itertools
 
 ERR = 'ERR\n'
 
-def main(config_file):
+def main(account):
 
     global ERR
 
     config = configparser.ConfigParser()
     try:
-        with open(config_file, 'r') as lines:
+        with open(account, 'r') as lines:
             lines = itertools.chain(('[top]\n',), lines)
             config.read_file(lines)
     except OSError:
@@ -114,8 +114,10 @@ def main(config_file):
     print(return_string, end='')
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print(ERR + 'No configuration file.')
-        sys.exit(1)
+    argparser = argparse.ArgumentParser(description='Fetch and display emails for the account defined in ACCOUNT.',
+            usage='glimpse.py ACCOUNT')
+    argparser.add_argument('account', metavar='ACCOUNT',
+            help='The account configuration file.')
+    args = argparser.parse_args()
 
-    main(sys.argv[1])
+    main(args.account)
