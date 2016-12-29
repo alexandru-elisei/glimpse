@@ -1,5 +1,6 @@
 #!/bin/env python3
 
+import sys
 import imaplib
 import email
 from email.header import decode_header, make_header
@@ -7,11 +8,11 @@ import configparser
 import argparse
 import itertools
 
-ERR = 'ERR\n'
+def exit(text):
+    ERR = 'ERR\n'
+    raise SystemExit(ERR + text)
 
 def main(account):
-
-    global ERR
 
     config = configparser.ConfigParser()
     try:
@@ -19,62 +20,52 @@ def main(account):
             lines = itertools.chain(('[top]\n',), lines)
             config.read_file(lines)
     except OSError:
-        print(ERR + 'Cannot read the configuration file.')
-        return
+        exit('Cannot read the configuration file.')
 
     conf = config['top']
 
     host = conf.get('host', None)
     if host is None:
-        print(ERR + 'Host configuration not found.')
-        return
+        exit('Host not found.')
 
     port = int(conf.get('port', imaplib.IMAP4_SSL_PORT))
     try:
         M = imaplib.IMAP4_SSL(host, port)
     except Exception as e:
-        print(ERR + 'Error connecting to ' + host +': ' + str(e) + '.')
-        return
+        exit('Error connecting to ' + host +': ' + str(e) + '.')
 
     user = conf.get('user', None)
     if user is None:
-        print(ERR + 'User configuration not found.')
-        return
+        exit('User configuration not found.')
 
     password = conf.get('password', None)
     if password is None:
-        print(ERR + 'Password configuration not found.')
-        return
+        exit('Password configuration not found.')
 
     try:
         status, msg = M.login(user, password)
     except Exception as e:
-        print(ERR + 'Error during ' + user + ' login: ' + str(e) + '.')
-        return
+        exit('Error during ' + user + ' login: ' + str(e) + '.')
 
     if status != 'OK':
-        print(ERR + 'Error during ' + user + ' login: ' + msg + '.')
-        return
+        exit('Error during ' + user + ' login: ' + msg.decode('ascii') + '.')
 
     mailbox = conf.get('mailbox', 'INBOX')
     status, msg = M.select(mailbox, True)
     if status != 'OK':
         msg = msg[0].decode()
-        print(ERR + 'Cannot select mailbox: ' + msg + '.')
-        return
+        exit('Cannot select mailbox: ' + msg + '.')
 
     status, msg = M.status(mailbox, '(UNSEEN)')
     if status != 'OK':
         msg = msg[0].decode()
-        print(ERR + 'Cannot get UNSEEN status: ' + msg + '.')
-        return
+        exit('Cannot get UNSEEN status: ' + msg + '.')
 
     unseen = int(msg[0].decode().split()[2].rstrip(')'))
 
     status, email_ids = M.search(None, '(UNSEEN)')
     if status != 'OK':
-        print(ERR + 'Cannot search UNSEEN email in ' + mailbox + '.')
-        return
+        exit('Cannot search UNSEEN email in ' + mailbox + '.')
     email_ids = email_ids[0].split()
 
     preview_count = unseen
@@ -89,8 +80,7 @@ def main(account):
         status, data = M.fetch(last_email_id, '(RFC822)')
         if status != 'OK':
             msg = msg[0].decode()
-            print(ERR + 'Cannot fetch email: ' + msg + '.')
-            return
+            exit('Cannot fetch email: ' + msg + '.')
 
         raw_email = data[0][1]
         email_msg = email.message_from_bytes(raw_email)

@@ -21,7 +21,7 @@ function glimpse:fetch_mail()
     -- Setting all acounts' state to fetching mail.
     for key, account in pairs(self.accounts) do
         self.accounts[key].state = 'fetching'
-        os.execute('touch '..account.tmpfile..' && chmod 0600 '..account.tmpfile..' && PYTHONIOENCODING=utf8 '..self.pyfile..' '..account.conf..' > '..account.tmpfile..' &')
+        os.execute('touch '..account.tmpfile..' && chmod 0600 '..account.tmpfile..' && PYTHONIOENCODING=utf8 '..self.pyfile..' '..account.conf..' &> '..account.tmpfile..' &')
     end
 end
 
