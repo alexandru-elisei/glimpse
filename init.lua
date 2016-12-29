@@ -3,7 +3,8 @@
 -- @release 0.4.1
 
 -- Module environment
-local wibox = require("wibox")
+local wibox = require('wibox')
+local awful = require('awful')
 local os = os
 local timer = timer
 local table = table
@@ -30,7 +31,7 @@ function glimpse:get_widget_text()
 
     for _, account in pairs(self.accounts) do
         widget_text = widget_text..account.shortname..': '
-        if account.state == "fetching" then
+        if account.state == 'fetching' then
             widget_text = widget_text..'? '
         elseif account.state == 'error' then
             widget_text = widget_text..'ERR '
@@ -228,6 +229,11 @@ local function new(args)
     end
 
     self.widget = wibox.widget.textbox()
+    self.widget:buttons(awful.util.table.join(
+        awful.button({ }, 1, function() self:toggle_notification() end),
+        awful.button({}, 3, function() self:start() end),
+        awful.button({}, 2, function() self:stop() end)
+    ))
 
     return self
 end

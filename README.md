@@ -8,7 +8,7 @@ Glimpse is a widget for [awesome WM](https://awesomewm.org/). Glimpse periodical
 
 #### Requirements
 Glimpse requires the following:
-- >=awesome-3.5.1 for the awesome timer and wibox.widget.textbox APIs.
+- awesome-3.5.x for the awesome timer and wibox.widget.textbox APIs. It will not work with awesome-4.x because of the API changes.
 - >=python-3.2.0 for the function ConfigParser.read_file().
 
 
@@ -46,9 +46,12 @@ For both situations you will need to specify the directory where the script glim
 
 
 #### Usage
-The widget works by periodically invoking the script glimpse.py with a configuration file and saving the output in a temporary file. This output is then parsed by the glimpse lua module and displayed.
+The module works by periodically invoking the script glimpse.py with a configuration file and saving the output in a temporary file. This output is then parsed and displayed as a notification. A widget can be added to the statusbar which will display the number of unread emails for each account. Mouse buttons can be used to interact with the widget:
+- left click displays the last notification.
+- middle click stops fetching emails.
+- right click (re)starts the module.
 
-You need to create a configuration file for each account. You can do that by copying and modifying the example.conf file. This file will contain the password for your email account in PLAINTEXT, so make sure nobody has access to it. You can do this by modifying the permissions on the file (`chmod 0600 your_conf.conf`) and make sure you lock your session each time you leave computer unsupervised.
+You need to create a configuration file for each account. You can do that by copying and modifying the example.conf file. This file will contain the password for your email account in PLAINTEXT, so make sure nobody has access to it. You can do this by modifying the permissions on the file (`chmod 0600 your_conf.conf`) and making sure you lock your session each time you leave computer unsupervised.
 
 The temporary files, one per account, are created with the default permissions of 0600 and are named .glimpse_shortname.out (notice the starting dot), where 'shortname' is the shortname for the email account.
 
@@ -59,7 +62,7 @@ To add the widget to rc.lua:
 ```lua
 glimpse = require('glimpse')
 ```
-after loading the wibox module.
+after loading the wibox and awful modules.
 - instantiate the widget
 ```lua
 email = glimpse({accounts = {{shortname = 'short', account = 'account@mail.com', conf = '~/account.conf'}}})
@@ -72,15 +75,6 @@ email = glimpse({accounts = {{shortname = 'short', account = 'account@mail.com',
 ```lua
 email:start()
 ```
-- optionally, attach button events to the widget on the statusbar
-```lua
-email.widget:buttons(awful.util.table.join(
-    awful.button({ }, 1, function() email:toggle_notification() end),
-    awful.button({}, 3, function() email:start() end),
-    awful.button({}, 2, function() email:stop() end)
-))
-```
-to use the left mouse button to toggle the notification, the scroll click to stop the automatic fetching of emails and the right mouse button to (re)start the widget.
 - add the widget to the statusbar. Before the line `right_layout:add(mytextclock)` insert the following:
 ```lua
 right_layout:add(email.widget)
