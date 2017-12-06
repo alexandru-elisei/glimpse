@@ -3,6 +3,7 @@
 -- @release 1.0.0
 
 -- Module environment
+local naughty = require('naughty')
 local wibox = require('wibox')
 local awful = require('awful')
 local os = os
